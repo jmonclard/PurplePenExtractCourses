@@ -37,6 +37,5 @@ if len(sys.argv)>1:
                       xml_declaration = True,
                       encoding = 'utf-8',
                       method = 'xml')
-
 print('Done.')
 
