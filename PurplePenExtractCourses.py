@@ -4,13 +4,14 @@ import xml.etree.ElementTree as ET
 
 # ======================================================
 # JM    2021-02-26 Initial release
-# fbd38 2021-03-03 Improved with removing unecessary beacon
+# fbd38 2021-03-03 Improved with removing unecessary controls
+# JM    2021-04-05 Removing useless code
 # ======================================================
 
 # ======================================================
 # Create xml files from courses of the original Purple Pen xml file
 # Each file contains only one course and is named from the course's name
-# All unused beacons are removed and the Start and Stop
+# All unused controls are removed and the Start and Stop controls
 # are a renamed DEPART / ARRIVEE
 # ======================================================
 
@@ -29,7 +30,7 @@ if len(sys.argv)>1:
         name = child.find('n:Name',ns)
         coursesname.append(name.text);
     nbcourses = len(coursesname)
-    print('   Number of events: ' + str(nbcourses));
+    print('   Number of couses : ' + str(nbcourses));
 
     # Cleck all courses
     for crs in range(nbcourses):
@@ -42,38 +43,29 @@ if len(sys.argv)>1:
             if i != crs:
                 newracecoursedata.remove(newcourses[i])
         # Remove unwanted controls in RaceCourseData
-        validcontrol=[]
-        newesttree = newtree
-        newestroot = newesttree.getroot()
-        bodyrace = newestroot.find('n:RaceCourseData',ns)
-        newcoursedata = bodyrace.find('n:Course',ns)
-        for valposte in newcoursedata.findall('n:CourseControl',ns):
-            validcontrol.append(((valposte.find('n:Control',ns)).text));
-        newestroot = newesttree.getroot()
-        posterace = newestroot.find('n:RaceCourseData',ns)
-        for poste in posterace.findall('n:Control',ns):
-            if poste.find('n:Id', ns).text not in validcontrol:
-                bodyrace.remove(poste);
-        # Change Start and Stop Beacon Names
-        newestroot = newesttree.getroot()
-        posterace = newestroot.find('n:RaceCourseData',ns)
-        for poste in posterace.findall('n:Control',ns):
-            if poste.get('type') == 'Start':
-                poste.find('n:Id',ns).text = 'DEPART';
-            if poste.get('type') == 'Finish':
-                poste.find('n:Id',ns).text = 'ARRIVEE';
-        newestroot = newesttree.getroot()
-        fool = newestroot.find('n:RaceCourseData',ns)
-        posterace = fool.find('n:Course', ns)
-        for poste in posterace.findall('n:CourseControl',ns):
-            if poste.get('type') == 'Start':
-                poste.find('n:Control',ns).text = 'DEPART';
-            if poste.get('type') == 'Finish':
-                poste.find('n:Control',ns).text = 'ARRIVEE';
-        # Create each XML file
+        usedcontrols=[]
+        remainingcourse = newracecoursedata.find('n:Course',ns)
+        for control in remainingcourse.findall('n:CourseControl',ns):
+            usedcontrols.append(((control.find('n:Control',ns)).text));
+            
+        for control in newracecoursedata.findall('n:Control',ns):
+            if control.find('n:Id', ns).text not in usedcontrols:
+                newracecoursedata.remove(control);
+        # Change Start and Stop controls Names
+        for control in newracecoursedata.findall('n:Control',ns):
+            if control.get('type') == 'Start':
+                control.find('n:Id',ns).text = 'DEPART';
+            if control.get('type') == 'Finish':
+                control.find('n:Id',ns).text = 'ARRIVEE';
+        for control in remainingcourse.findall('n:CourseControl',ns):
+            if control.get('type') == 'Start':
+                control.find('n:Control',ns).text = 'DEPART';
+            if control.get('type') == 'Finish':
+                control.find('n:Control',ns).text = 'ARRIVEE';
+        # Create XML file
         newfilename = filename + '_' + coursesname[crs] + '.xml'
-        print('Exporting : '+newfilename)
-        newesttree.write(newfilename,
+        print('Extracting : '+newfilename)
+        newtree.write(newfilename,
                       xml_declaration = True,
                       encoding = 'utf-8',
                       method = 'xml')
