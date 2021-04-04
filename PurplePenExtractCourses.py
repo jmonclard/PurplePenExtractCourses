@@ -30,7 +30,7 @@ if len(sys.argv)>1:
         name = child.find('n:Name',ns)
         coursesname.append(name.text);
     nbcourses = len(coursesname)
-    print('   Number of couses : ' + str(nbcourses));
+    print('   Number of courses : ' + str(nbcourses));
 
     # Cleck all courses
     for crs in range(nbcourses):
